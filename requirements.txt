@@ -5,12 +5,12 @@ numpy==1.24.3
 matplotlib==3.7.1
 plotly==5.14.0
 ta==0.10.2
-ccxt==4.0.3
+ccxt==4.5.50
 yfinance==0.2.32
-pandas_ta==0.3.14b0
+git+https://github.com/twopirllc/pandas-ta.git
 requests==2.31.0
 python-dateutil==2.8.2
 pytz==2023.3
-pydantic==2.2.1
+pydantic==2.3.0
 APScheduler==3.10.4
 plyer==2.1.0
