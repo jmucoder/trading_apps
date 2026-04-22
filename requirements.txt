@@ -7,11 +7,10 @@ plotly==5.14.0
 ta==0.10.2
 ccxt==4.0.3
 yfinance==0.2.32
-git+https://github.com/twopirllc/pandas-ta.git@0.3.14b0
+https://github.com/twopirllc/pandas-ta/archive/refs/tags/v0.3.14b0.zip
 requests==2.31.0
 python-dateutil==2.8.2
 pytz==2023.3
 pydantic==2.2.1
 APScheduler==3.10.4
 plyer==2.1.0
-
