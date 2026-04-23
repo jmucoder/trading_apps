@@ -26,7 +26,8 @@ class MarketDataFetcher:
 
     def __init__(self):
         """Initialize market data fetcher with different APIs"""
-        self.binance = ccxt.binance()
+        # Use Bybit instead of Binance (Binance is geo-blocked on Streamlit Cloud)
+        self.exchange = ccxt.bybit()
         self.currencies = ['BTC', 'ETH', 'BNB', 'XRP', 'ADA']
         self.stocks = ['NIFTY', 'RELIANCE.NS', 'TCS.NS', 'INFY.NS']
 
@@ -56,8 +57,8 @@ class MarketDataFetcher:
             
             tf = timeframe_map.get(timeframe, '1h')
             
-            # Fetch OHLCV data from Binance
-            ohlcv = self.binance.fetch_ohlcv(symbol, tf, limit=limit)
+            # Fetch OHLCV data from Bybit
+            ohlcv = self.exchange.fetch_ohlcv(symbol, tf, limit=limit)
             
             # Convert to DataFrame
             df = pd.DataFrame(
@@ -68,7 +69,7 @@ class MarketDataFetcher:
             # Convert timestamp to datetime
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
             df['symbol'] = symbol
-            df['source'] = 'Binance'
+            df['source'] = 'Bybit'
             
             logger.info(f"Fetched {len(df)} candles for {symbol} on {timeframe}")
             return df
@@ -107,14 +108,22 @@ class MarketDataFetcher:
                 logger.warning(f"No data found for {symbol}")
                 return pd.DataFrame()
             
-            # Reset index and rename columns
+            # Reset index and get column names
             data = data.reset_index()
-            data.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'adj_close']
+            
+            # Handle dynamic column names from yfinance
+            cols = list(data.columns)
+            # Map columns dynamically
+            col_mapping = {}
+            for i, col in enumerate(cols):
+                if i == 0:
+                    col_mapping[col] = 'timestamp'
+                elif hasattr(col, 'lower'):
+                    col_mapping[col] = col.lower()
+            
+            data = data.rename(columns=col_mapping)
             data['symbol'] = symbol
             data['source'] = 'Yahoo Finance'
-            
-            # Drop adj_close as we have close price
-            data = data.drop('adj_close', axis=1)
             
             logger.info(f"Fetched {len(data)} candles for {symbol} on {interval}")
             return data
@@ -134,7 +143,7 @@ class MarketDataFetcher:
             Dictionary with price and market data
         """
         try:
-            ticker = self.binance.fetch_ticker(symbol)
+            ticker = self.exchange.fetch_ticker(symbol)
             return {
                 'symbol': symbol,
                 'current_price': ticker['last'],
